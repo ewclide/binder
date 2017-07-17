@@ -2,16 +2,22 @@ $(document).ready(function(){
         function Binder(options)
         {
             this.setOptions(options).to([
+                "id",
                 "elem",
                 "target",
                 "before",
                 "after",
                 "append",
+                "replace",
                 "css",
                 "radio",
+                "radio_target",
                 "checkbox",
+                "checkbox_target",
                 "addclass",
-                "delclass"
+                "delclass",
+                "append_target",
+                "replace_target"
             ]);
             this.init(options);
         }
@@ -32,23 +38,21 @@ $(document).ready(function(){
         {
             for (var name in options)
             {
-                var attribute = element.attr("data-" + name);
+                var attribute = element.attr("data-" + name.replace("_", "-"));
                 if (attribute !== undefined)
                 {
                     switch (options[name])
                     {
-                        case "$" :
+                        case "selector" :
                             attribute = $(attribute);
                             if (!attribute) console.error("attribute " + name + " in element " + this.elem + " must be selector!");
                             else this[name] = attribute;
                             break;
-                        case "$ or null" :
-                            if (attribute) attribute = $(attribute);
-                            if (!attribute) attribute = true;
+                        case "html" :
                             this[name] = attribute;
                             break;
-                        case "text" :
-                            this[name] = attribute;
+                        case "null" :
+                            this[name] = true;
                             break;
                     }
 
@@ -61,69 +65,63 @@ $(document).ready(function(){
             if (this.elem)
             {
                 this.getAttributes(this.elem, {
-                    target   : "$",
-                    radio    : "$ or null",
-                    checkbox : "$",
-                    append   : "text",
-                    before   : "text",
-                    after    : "text",
-                    css      : "text",
-                    addclass : "text",
-                    delclass : "text"
+                    target   : "selector",
+                    radio    : "selector",
+                    checkbox : "selector",
+                    append   : "html",
+                    before   : "html",
+                    after    : "html",
+                    replace  : "html",
+                    css      : "html",
+                    addclass : "html",
+                    delclass : "html",
+                    radio_target    : "selector",
+                    checkbox_target : "selector",
+                    append_target   : "selector",
+                    replace_target  : "selector"
                 });
-                this.id = this.target.attr("id");
+                if (!this.target.attr("data-binder-target-id")) this.target.attr("data-binder-target-id", Math.random());
+                this.id = this.target.attr("data-binder-target-id");
                 var self = this;
                 this.elem.click(function(){
                     self.import();
                 });
             }
-            //console.log(this);
         }
         Binder.prototype.import = function()
         {
-            function setStyles(element, styles)
-            {
-                styles = styles.split(";");
-                if (styles.length) for (var style in styles) setStyle(element, styles[style]);
-                else setStyle(element, styles);
-            }
-
-            function setStyle(element, style)
-            {
-                style = style.split(":");
-                var prop = "";
-                for (var i = 1; i < style.length; i++) prop += style[i];
-                element.css(style[0].replace(/^\s+/g, ""), prop.replace(/^\s+/g, ""));
-            }
-
             if (this.target)
             {
                 $("[data-binder-id='"+this.id+"']").remove();
-                if (this.append) this.target.append("<div data-binder-id='" + this.id + "'>" + this.append + "</div>");
+                if (this.append)
+                {
+                    var content = "<div data-binder-id='" + this.id + "'>" + this.append + "</div>";
+                    if (this.append_target) this.append_target.append(content);
+                    else this.target.append(content);
+                }
                 if (this.before) this.target.before("<div data-binder-id='" + this.id + "'>" + this.before + "</div>");
                 if (this.after) this.target.after("<div data-binder-id='" + this.id + "'>" + this.after + "</div>");
-                if (this.css) setStyles(this.target, this.css);
+                if (this.replace)
+                {
+                    var content = "<div data-binder-id='" + this.id + "'>" + this.replace + "</div>";
+                    if (this.replace_target)
+                    {
+                         this.replace_target.empty();
+                         this.replace_target.append(content);
+                    }
+                    else
+                    {
+                        this.target.empty();
+                        this.target.append(content);
+                    }
+                }
+                if (this.css) this.target.attr("style", this.css);
                 if (this.addclass) this.target.addClass(this.addclass);
                 if (this.delclass) this.target.removeClass(this.delclass);
-                if (this.radio)
-                {
-                    if (typeof this.radio == "boolean") this.elem.find("input[type=radio]").prop({'checked': true});
-                    else
-                    {
-                        var radio = $(this.radio);
-                        if (radio) radio.prop({'checked': true});
-                    }
-                }
-                if (this.checkbox)
-                {
-                    if (typeof this.checkbox == "boolean") this.elem.find("input[type=checkbox]").prop({'checked': true});
-                    else
-                    {
-                        var checkbox = $(this.checkbox);
-                        if (checkbox) checkbox.prop({'checked': true});
-                    }
-                }
-
+                if (this.radio_target) this.radio_target.prop({'checked': true});
+                if (this.radio) this.elem.find("input[type=radio]").prop({'checked': true});
+                if (this.checkbox_target) this.checkbox_target.prop({'checked': true});
+                if (this.checkbox) this.elem.find("input[type=checkbox]").prop({'checked': true});
             }
         }
 
