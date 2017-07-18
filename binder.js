@@ -119,9 +119,19 @@ $(document).ready(function(){
                 if (this.addclass) this.target.addClass(this.addclass);
                 if (this.delclass) this.target.removeClass(this.delclass);
                 if (this.radio_target) this.radio_target.prop({'checked': true});
-                if (this.radio) this.elem.find("input[type=radio]").prop({'checked': true});
+                if (this.radio)
+                {
+                    var radio = this.elem.find("input[type=radio]");
+                        radio.prop({'checked': true});
+                        radio.change();
+                }
                 if (this.checkbox_target) this.checkbox_target.prop({'checked': true});
-                if (this.checkbox) this.elem.find("input[type=checkbox]").prop({'checked': true});
+                if (this.checkbox)
+                {
+                    var checkbox = this.elem.find("input[type=checkbox]")
+                        checkbox.prop({'checked': true});
+                        checkbox.change();
+                }
             }
         }
 
