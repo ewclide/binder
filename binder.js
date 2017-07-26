@@ -142,8 +142,16 @@ $(document).ready(function(){
                     else checkbox.prop({'checked': true});
                     checkbox.change();
                     break;
-                case "radio_inset" : target.find("input[type=radio]").prop({'checked': true}); target.change(); break;
-                case "checkbox_inset" : target.find("input[type=checkbox]").prop({'checked': true}); target.change(); break;
+                case "radio_inset" :
+                    target = target.find("input[type=radio]");
+                    target.prop({'checked': true});
+                    target.change();
+                    break;
+                case "checkbox_inset" :
+                    target = target.find("input[type=checkbox]");
+                    target.prop({'checked': true});
+                    target.change();
+                    break;
             }
         }
 
